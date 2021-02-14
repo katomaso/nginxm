@@ -1,0 +1,5 @@
+    location {{PATH}} {
+    	root /var/www/{{domain}}{{path}};
+	    client_max_body_size 3M;
+	    index index.html;
+	}

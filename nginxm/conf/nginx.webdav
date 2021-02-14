@@ -1,0 +1,21 @@
+    location {{PATH}}webdav/ {
+        root /var/webdav/{{domain}}{{path}};
+
+        auth_basic "restricted";
+        auth_basic_user_file {{authfile}};
+
+        dav_access      user:rw group:rw all:rw;
+        dav_methods     PUT DELETE MKCOL COPY MOVE;
+        dav_ext_methods PROPFIND OPTIONS;
+
+        autoindex     on;
+        create_full_put_path  on;
+
+        # Preflighted requests
+        if ($request_method = OPTIONS) {
+            add_header "Access-Control-Allow-Origin" *;
+            add_header "Access-Control-Allow-Methods" "GET, HEAD, POST, PUT, OPTIONS, MOVE, DELETE, COPY, LOCK, UNLOCK, PROPFIND";
+            add_header "Access-Control-Allow-Headers" "Authorization, Origin, Content-Type, Accept, DNT, X-CustomHeader, Keep-Alive,User-Agent, X-Requested-With, If-Modified-Since, Cache-Control, Content-Range, Range, Depth";
+            return 200;
+        }
+    }
