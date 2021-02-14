@@ -5,7 +5,10 @@ import os.path
 import pkg_resources
 import shutil
 import subprocess
+
 from datetime import date
+
+from . import utils
 
 ACME_URL = acme_tiny.DEFAULT_DIRECTORY_URL
 ACME_KEY = "/etc/ssl/acme/account.key"
@@ -39,9 +42,10 @@ def add_domain(domain: str):
 		subprocess.run(["openssl", 'req', '-new', '-sha256', '-key', key, '-subj', f'/CN={domain}'], stdout=csr_file, check=True)
 
 	domain_folder = f"/etc/nginx/conf.d/{domain}"
-	os.mkdir(domain_folder)
 	utils.render_resource("conf/nginx.conf", f"/etc/nginx/conf.d/{domain}.conf", {
 		"DOMAIN_CRT": crt, "DOMAIN_KEY": key, "DOMAIN": domain})
+	if not os.path.exists(domain_folder):
+		os.mkdir(domain_folder)
 
 	# add domain renewal timer and start it right away
 	if not os.exists(SYSTEMD_TEMPLATE):
