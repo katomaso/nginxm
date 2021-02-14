@@ -28,8 +28,7 @@ def add_domain(domain: str):
 	d = date.today()
 	key = f"/etc/ssl/acme/{domain}.key"
 	csr = f"/etc/ssl/acme/{domain}.csr"
-	crt = f"/etc/ssl/acme/{domain}-{d.year}{d.month}{d.day}.crt"
-	crt_link = f"/etc/ssl/private/{domain}.crt"
+	crt = f"/etc/ssl/private/{domain}.crt"
 
 	# create private key for the domain
 	with open(key, "wb") as key_file:
@@ -59,14 +58,16 @@ def add_domain(domain: str):
 def	renew_domain(domain: str):
 	crt = f"/etc/ssl/acme/{domain}-{d.year}{d.month}{d.day}.crt"
 	crt_link = f"/etc/ssl/private/{domain}.crt"
-	
-	if os.path.exists(crt_link):
-		crt_prev = os.path.realpath(crt_link)
 
 	# sign the request using acme_tiny
 	crt_data = acme_tiny.sign(csr=csr, acme_dir=ACME_CHALLENGE, account_key=ACME_KEY)
 	with open(crt, "wb") as crt_file:
 		crt_file.write(crt_data)
+
+	# update the symlink to point to newly generated file
+	if os.path.exists(crt_link):
+		os.unlink(crt_link)
+	os.symlink(crt, crt_link)
 
 	subprocess.run(["nginx", "-t"], check=True)
 	subprocess.run(["systemctl", "reload", "nginx"], check=True)
