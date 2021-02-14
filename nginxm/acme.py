@@ -32,11 +32,11 @@ def add_domain(domain: str):
 
 	# create private key for the domain
 	with open(key, "wb") as key_file:
-		subprocess.run(["openssl", "genrsa", "4096"], stdout=key_file, check=True, capture_output=True)
+		subprocess.run(["openssl", "genrsa", "4096"], stdout=key_file, check=True)
 
 	# create a CSR for the domain
 	with open(csr, "wb") as csr_file:
-		subprocess.run(["openssl", 'req', '-new', '-sha256', '-key', key, '-subj', f'"/CN={domain}"'], stdout=csr_file, check=True, capture_output=True)
+		subprocess.run(["openssl", 'req', '-new', '-sha256', '-key', key, '-subj', f'/CN={domain}'], stdout=csr_file, check=True)
 
 	domain_folder = f"/etc/nginx/conf.d/{domain}"
 	os.mkdir(domain_folder)

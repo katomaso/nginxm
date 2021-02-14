@@ -51,7 +51,7 @@ def main() -> int:
 		conf.add_webdav(domain, path, username, password)
 	return 0
 
-def check_args(args: list[str], n: int) -> tuple[str]:
+def check_args(args, n: int):
 	if len(args) < n+1:
 		print("Not enough arguments for " + args[0], file=sys.stderr)
 		print(__usage__, file=sys.stderr)
