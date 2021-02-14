@@ -4,7 +4,7 @@ import os
 from . import conf
 from . import acme
 
-__usage__ = """Usage: nginxm COMMAND options
+__usage__ = f"""Usage: nginxm COMMAND options
 
 COMMANDS with options:
 
@@ -19,8 +19,8 @@ also sets systemd timers for domain certificates renewals.
 Some parts of this app can be modified using env vars:
 
 	ACME_URL to change for example for staging environment https://acme-staging-v02.api.letsencrypt.org/directory
-	ACME_KEY location where ACME account key is/will be stored
-	ACME_CHALLENGE location where the challenges should be stored to be served by nginx
+	ACME_KEY location where ACME account key is/will be stored; default: {acme.ACME_KEY}
+	ACME_CHALLENGE location where the challenges should be stored to be served by nginx; default: {acme.ACME_CHALLENGE}
 """
 
 # main function must be here because of setuptools entrypoint
