@@ -3,6 +3,7 @@ import os
 
 from . import conf
 from . import acme
+from . import utils
 
 __usage__ = f"""Usage: nginxm COMMAND options
 
@@ -17,7 +18,7 @@ and writes to /etc/ssl and creates folders under /var/www/. It
 also sets systemd timers for domain certificates renewals.
 
 Some parts of this app can be modified using env vars:
-
+	DEBUG set to any value to allow debugging output
 	ACME_URL to change for example for staging environment https://acme-staging-v02.api.letsencrypt.org/directory
 	ACME_KEY location where ACME account key is/will be stored; default: {acme.ACME_KEY}
 	ACME_CHALLENGE location where the challenges should be stored to be served by nginx; default: {acme.ACME_CHALLENGE}
@@ -30,6 +31,11 @@ def main() -> int:
 	if len(args) == 0 or "help" in args:
 		print(__usage__, file=sys.stderr)
 		return 0
+	if "DEBUG" in os.environ:
+		utils.log_level("debug")
+	else:
+		utils.log_level("info")
+
 	if "ACME_URL" in os.environ:
 		acme.ACME_URL = os.environ["ACME_URL"]
 	if "ACME_KEY" in os.environ:

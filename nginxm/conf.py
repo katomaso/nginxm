@@ -13,7 +13,7 @@ SYSTEMD_TEMPLATE = "/etc/systemd/system/renew-domain@.service"
 def add_path(domain: str, path: str):
 	"""Add nginx "location" configuration into domain's conf.d folder"""
 	path_safe_name = path[1:].replace('/', '-') if path != "/" else "default"
-	utils.rener_resource("conf/nginx.path", f"/etc/nginx/conf.d/{domain}/{path_safe_name}.conf", {
+	utils.render_resource("conf/nginx.path", f"/etc/nginx/conf.d/{domain}/{path_safe_name}.conf", {
 		"path": path, "path_safe_name": path_safe_name, "domain": domain
 		}
 	)
@@ -36,6 +36,6 @@ def add_webdav(domain: str, path: str, username: str, password: str):
 	os.makedirs(f"/var/webdav/{domain}{path}") # throws if folder already exists
 	shutil.chown(f"/var/webdav/{domain}{path}", "www-data")
 
-	utils.rener_resource("conf/nginx.webdav", f"/etc/nginx/conf.d/{domain}/{path_safe_name}.conf", {
+	utils.render_resource("conf/nginx.webdav", f"/etc/nginx/conf.d/{domain}/{path_safe_name}.conf", {
 		"path": path, "path_safe_name": path_safe_name, "domain": domain, "authfile": authfile}
 	)
