@@ -5,10 +5,10 @@ import logging
 logger = logging.getLogger("nginxm")
 
 def render_resource(resource: str, target: str, context: dict):
-	template = str(pkg_resources.resource_string("nginxm", resource))
+	template = pkg_resources.resource_string("nginxm", resource).decode('utf-8')
 	content = jinja2.Template(template).render(context)
 	with open(target, "wt") as target_file:
-		target_file.write(target_content)
+		target_file.write(content)
 
 def log_info(msg: str):
 	logger.info(msg)

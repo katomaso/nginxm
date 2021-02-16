@@ -8,8 +8,6 @@ from datetime import date
 from . import acme
 from . import utils
 
-SYSTEMD_TEMPLATE = "/etc/systemd/system/renew-domain@.service"
-
 def add_path(domain: str, path: str):
 	"""Add nginx "location" configuration into domain's conf.d folder"""
 	path_safe_name = path[1:].replace('/', '-') if path != "/" else "default"
