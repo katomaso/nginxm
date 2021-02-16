@@ -49,6 +49,9 @@ def main() -> int:
 	if cmd == "renew-domain":
 		domain, = check_args(args, 1)
 		acme.renew_domain(domain)
+	if cmd == "remove-domain":
+		domain, = check_args(args, 1)
+		acme.remove_domain(domain)
 	if cmd == "add-path":
 		domain, path = check_args(args, 2)
 		conf.add_path(domain, path)

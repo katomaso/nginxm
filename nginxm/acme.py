@@ -90,3 +90,17 @@ def	renew_domain(domain: str):
 	subprocess.run(["nginx", "-t"], check=True)
 	subprocess.run(["systemctl", "reload", "nginx"], check=True)
 	utils.log_info("Nginx reloaded")
+
+def remove_domain(domain: str):
+	os.rmdir(f"/etc/nginx/conf.d/{domain}")
+	os.remove(f"/etc/nginx/conf.d/{domain}.conf")
+	subprocess.run(["nginx", "-t"], check=True)
+	subprocess.run(["systemctl", "reload", "nginx"], check=True)
+
+	os.remove(f"/etc/ssl/acme/{domain}.key")
+	os.remove(f"/etc/ssl/acme/{domain}.csr")
+	os.remove(f"/etc/ssl/private/{domain}.crt")
+
+	subprocess.run(["systemctl", "stop", "renew-domain@{domain}.timer"], check=True)
+	subprocess.run(["systemctl", "disable", "renew-domain@{domain}.timer"], check=True)
+	os.remove(f"/etc/systemd/system/renew-domain@{domain}.timer")
