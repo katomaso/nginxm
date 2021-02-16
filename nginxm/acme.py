@@ -71,6 +71,7 @@ def add_domain(domain: str):
 
 def	renew_domain(domain: str):
 	d = date.today()
+	csr = f"/etc/ssl/acme/{domain}.csr"
 	crt = f"/etc/ssl/acme/{domain}-{d.year}{d.month}{d.day}.crt"
 	crt_link = f"/etc/ssl/private/{domain}.crt"
 
