@@ -28,7 +28,6 @@ def add_domain(domain: str):
 
 	assert os.path.isdir(ACME_CHALLENGE), f"Folder {ACME_CHALLENGE} must exist"
 
-	d = date.today()
 	key = f"/etc/ssl/acme/{domain}.key"
 	csr = f"/etc/ssl/acme/{domain}.csr"
 	crt = f"/etc/ssl/private/{domain}.crt"
@@ -71,6 +70,7 @@ def add_domain(domain: str):
 
 
 def	renew_domain(domain: str):
+	d = date.today()
 	crt = f"/etc/ssl/acme/{domain}-{d.year}{d.month}{d.day}.crt"
 	crt_link = f"/etc/ssl/private/{domain}.crt"
 
