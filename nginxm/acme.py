@@ -33,8 +33,8 @@ def add_domain(domain: str):
 	csr = f"/etc/ssl/acme/{domain}.csr"
 	crt = f"/etc/ssl/private/{domain}.crt"
 
-	assert !os.path.exists(key), "Key for the domain already exist at " + key
-	assert !os.path.exists(csr), "Signing request for the domain already exist at " + csr
+	assert not os.path.exists(key), "Key for the domain already exist at " + key
+	assert not os.path.exists(csr), "Signing request for the domain already exist at " + csr
 
 	# create private key for the domain
 	with open(key, "wb") as key_file:
