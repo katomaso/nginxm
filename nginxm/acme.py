@@ -75,7 +75,7 @@ def	renew_domain(domain: str):
 	crt_link = f"/etc/ssl/private/{domain}.crt"
 
 	# sign the request using acme_tiny
-	crt_data = acme_tiny.sign(csr=csr, acme_dir=ACME_CHALLENGE, account_key=ACME_KEY)
+	crt_data = acme_tiny.get_crt(csr=csr, acme_dir=ACME_CHALLENGE, account_key=ACME_KEY)
 	with open(crt, "wb") as crt_file:
 		crt_file.write(crt_data)
 	utils.log_info("Generated signed certificate " + crt)
