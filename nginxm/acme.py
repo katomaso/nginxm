@@ -72,12 +72,12 @@ def add_domain(domain: str):
 def	renew_domain(domain: str):
 	d = date.today()
 	csr = f"/etc/ssl/acme/{domain}.csr"
-	crt = f"/etc/ssl/acme/{domain}-{d.year}{d.month}{d.day}.crt"
+	crt = f"/etc/ssl/acme/{domain}-{d.year}-{d.month}-{d.day}.crt"
 	crt_link = f"/etc/ssl/private/{domain}.crt"
 
 	# sign the request using acme_tiny
 	crt_data = acme_tiny.get_crt(csr=csr, acme_dir=ACME_CHALLENGE, account_key=ACME_KEY)
-	with open(crt, "wb") as crt_file:
+	with open(crt, "wt") as crt_file:
 		crt_file.write(crt_data)
 	utils.log_info("Generated signed certificate " + crt)
 
