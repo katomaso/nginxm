@@ -1,5 +1,0 @@
-[Unit]
-Description=Watch %i for changes and regenerate
-
-[Service]
-ExecStart={{BINARY}} %i

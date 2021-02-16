@@ -2,4 +2,4 @@
 Description=Renewal of certificate %i using acme
 
 [Service]
-ExecStart={{BINARY}} renew-domain %i
+ExecStart={{binary}} renew-domain %i
