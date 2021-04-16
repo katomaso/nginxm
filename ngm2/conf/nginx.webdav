@@ -1,15 +1,19 @@
 	location {{PATH}}webdav/ {
 		root /var/webdav/{{domain}}{{path}};
 
-		auth_basic "restricted";
-		auth_basic_user_file {{authfile}};
-
 		dav_access      user:rw group:rw all:rw;
 		dav_methods     PUT DELETE MKCOL COPY MOVE;
 		dav_ext_methods PROPFIND OPTIONS;
 
 		autoindex     on;
 		create_full_put_path  on;
+
+		{% if authfile %}
+		auth_basic "restricted";
+		auth_basic_user_file {{authfile}};
+		{% else %}
+		auth_basic off;
+		{% endif %}
 
 		# Preflighted requests
 		if ($request_method = OPTIONS) {

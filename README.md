@@ -1,11 +1,11 @@
-# nginxm
+# ngm2
 
 Simple management tool for nginx's virtual servers with automatic SSL certificates.
 It uses systemd timers for renewals of the certificates.
 
 ## Configuration
 
-Install by `pip install nginxm`. Now you have `ngm` entry point available. 
+Install by `pip install ngm2`. Now you have `ngm2` entry point available. 
 
 Ngm supposes that only HTTP traffic is handled by your current nginx's config
 ```

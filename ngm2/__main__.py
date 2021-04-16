@@ -5,7 +5,7 @@ from . import conf
 from . import acme
 from . import utils
 
-__usage__ = f"""Usage: nginxm COMMAND options
+__usage__ = f"""Usage: ngm2 COMMAND options
 
 COMMANDS with options:
 
@@ -13,7 +13,7 @@ COMMANDS with options:
 	add-path <domain> <path>
 	add-webdav <domain> <path> <username> <password>
 
-nginxm command must be run as root. It modifies nginx's conf.d
+ngm2 command must be run as root. It modifies nginx's conf.d
 and writes to /etc/ssl and creates folders under /var/www/. It
 also sets systemd timers for domain certificates renewals.
 
@@ -55,9 +55,15 @@ def main() -> int:
 	if cmd == "add-path":
 		domain, path = check_args(args, 2)
 		conf.add_path(domain, path)
-	if cmd == "add-webdav":
+	if cmd == "add-auth":
 		domain, path, username, password = check_args(args, 4)
-		conf.add_webdav(domain, path, username, password)
+		conf.add_auth(domain, path, username, password)
+	if cmd == "add-webdav":
+		domain, path = check_args(args, 2)
+		conf.add_webdav(domain, path)
+	if cmd == "add-proxy":
+		domain, path, port = check_args(args, 3)
+		conf.add_webdav(domain, path, port)
 	return 0
 
 def check_args(args, n: int):

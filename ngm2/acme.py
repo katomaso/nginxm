@@ -59,7 +59,7 @@ def add_domain(domain: str):
 	if not os.path.exists("/etc/systemd/system/renew-domain@.service"):
 		# install the template for certificate renewals
 		utils.render_resource("conf/systemd.template", "/etc/systemd/system/renew-domain@.service", {
-			"binary": shutil.which("nginxm")}) # installed as entry-point
+			"binary": shutil.which("ngm2")}) # installed as entry-point
 	# create timer for the renewal if it was successful
 	utils.render_resource("conf/systemd.timer", f"/etc/systemd/system/renew-domain@{domain}.timer", {})
 	utils.log_info("Generated systemd timer " + f"/etc/systemd/system/renew-domain@{domain}.timer")
