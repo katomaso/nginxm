@@ -2,12 +2,15 @@ server {
 	listen 80 default_server;
 	listen [::]:80 default_server;
 
+	# catch all hostnames
 	server_name _;
 
+	# support letsencrypt ACME protocol
 	location /.well-known/acme-challenge/ {
 		root /var/www/;
 	}
 
+	# redirect any traffic (excluding ACME) to HTTPS
 	location / {
 		return 301 https://$host$request_uri;
 	}

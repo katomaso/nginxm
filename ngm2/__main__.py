@@ -62,7 +62,7 @@ def main() -> int:
 	elif cmd == "html":
 		url, = check_args(args, 1)
 		nginx.add_html(url, protected=check_protected(args))
-	elif cmd == "add-auth":
+	elif cmd == "protect":
 		url, username, password = check_args(args, 3)
 		nginx.add_auth(url, username, password)
 	elif cmd == "webdav":
