@@ -46,7 +46,7 @@ def add_domain(domain: str):
 		utils.log_info("Created request file " + csr)
 
 	domain_folder = f"/etc/nginx/conf.d/{domain}"
-	utils.render_resource("conf/nginx.conf", f"/etc/nginx/conf.d/{domain}.conf", {
+	utils.render_resource("conf/nginx.server", f"/etc/nginx/conf.d/{domain}.conf", {
 		"DOMAIN_CRT": crt, "DOMAIN_KEY": key, "DOMAIN": domain})
 	if not os.path.exists(domain_folder):
 		os.mkdir(domain_folder)

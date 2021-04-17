@@ -40,10 +40,11 @@ def add_webdav(domain: str, path: str, suffix="webdav", protected=False):
 	ctx = _standard_context(domain, path, protected)
 	utils.render_resource("conf/nginx.webdav", f"/etc/nginx/conf.d/{domain}/{path_dirname}-{suffix}.conf", ctx)
 
-def add_proxy(domain: str, path: str, suffix="", protected=False):
+def add_proxy(domain: str, path: str, suffix:str, port:int, protected=False):
 	"""Add nginx "location" configuration into domain's conf.d folder"""
 	fullpath = path + "" if not suffix else f"/{suffix}".replace("//", "/")
 	ctx = _standard_context(domain, path, protected)
+	ctx.update(port=port)
 	utils.render_resource("conf/nginx.webdav", f"/etc/nginx/conf.d/{domain}/{utils.to_dirname(fullpath)}.conf", ctx)
 
 def _standard_context(domain: str, path: str, protected:bool):
