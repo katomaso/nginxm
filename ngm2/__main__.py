@@ -1,17 +1,20 @@
 import sys
 import os
 
-from . import conf
+from . import nginx
 from . import acme
 from . import utils
+
+from typing import List
 
 __usage__ = f"""Usage: ngm2 COMMAND options
 
 COMMANDS with options:
 
-	add-domain <domain>
-	add-path <domain> <path>
-	add-webdav <domain> <path> <username> <password>
+	install - run initially to set new "default" server config in nginx
+	html <url>
+	proxy <url> <port>
+	webdav <url> <username> <password>
 
 ngm2 command must be run as root. It modifies nginx's conf.d
 and writes to /etc/ssl and creates folders under /var/www/. It
@@ -28,7 +31,7 @@ Some parts of this app can be modified using env vars:
 # otherwise the content of main() would be simply in the file
 def main() -> int:
 	args = sys.argv[1:]
-	if len(args) == 0 or "help" in args:
+	if len(args) == 0 or "help" in args or "--help" in args:
 		print(__usage__, file=sys.stderr)
 		return 0
 	if "DEBUG" in os.environ:
@@ -42,28 +45,35 @@ def main() -> int:
 		acme.ACME_KEY = os.environ["ACME_KEY"]
 	if "ACME_CHALLENGE" in os.environ:
 		acme.ACME_CHALLENGE = os.environ["ACME_CHALLENGE"]
+	if "ACME_MOCK" in os.environ:
+		acme.ACME_MOCK = True
 	cmd = args[0]
-	if cmd == "add-domain":
+	if cmd == "install":
+		nginx.install_default()
+	elif cmd == "add-domain":
 		domain, = check_args(args, 1)
 		acme.add_domain(domain)
-	if cmd == "renew-domain":
+	elif cmd == "renew-domain":
 		domain, = check_args(args, 1)
 		acme.renew_domain(domain)
-	if cmd == "remove-domain":
+	elif cmd == "remove-domain":
 		domain, = check_args(args, 1)
 		acme.remove_domain(domain)
-	if cmd == "add-path":
-		domain, path = check_args(args, 2)
-		conf.add_path(domain, path)
-	if cmd == "add-auth":
-		domain, path, username, password = check_args(args, 4)
-		conf.add_auth(domain, path, username, password)
-	if cmd == "add-webdav":
-		domain, path = check_args(args, 2)
-		conf.add_webdav(domain, path)
-	if cmd == "add-proxy":
-		domain, path, port = check_args(args, 3)
-		conf.add_webdav(domain, path, port)
+	elif cmd == "html":
+		url, = check_args(args, 1)
+		nginx.add_html(url, protected=check_protected(args))
+	elif cmd == "add-auth":
+		url, username, password = check_args(args, 3)
+		nginx.add_auth(url, username, password)
+	elif cmd == "webdav":
+		url, = check_args(args, 1)
+		nginx.add_webdav(url, protected=check_protected(args))
+	elif cmd == "proxy":
+		url, port = check_args(args, 2)
+		nginx.add_proxy(url, port, protected=check_protected(args))
+	else:
+		print(__usage__, file=sys.stderr)
+		return 1
 	return 0
 
 def check_args(args, n: int):
@@ -72,6 +82,9 @@ def check_args(args, n: int):
 		print(__usage__, file=sys.stderr)
 		sys.exit(1)
 	return args[1:1+n+1]
+
+def check_protected(args: List[str]):
+	return "--protected" in args
 
 if __name__ == "__main__":
 	sys.exit(main())

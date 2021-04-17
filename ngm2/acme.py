@@ -5,6 +5,7 @@ import os.path
 import pkg_resources
 import shutil
 import subprocess
+import pathlib
 
 from datetime import date
 
@@ -13,11 +14,29 @@ from . import utils
 ACME_URL = acme_tiny.DEFAULT_DIRECTORY_URL
 ACME_KEY = "/etc/ssl/acme/account.key"
 ACME_CHALLENGE = "/var/www/.well-known/acme-challenge"
+ACME_MOCK = False
 
 def exist_domain(domain: str) -> bool :
 	crt_link = f"/etc/ssl/private/{domain}.crt"
 	domain_conf = f"/etc/nginx/conf.d/{domain}.conf"
 	return os.path.exists(crt_link) and os.path.exists(domain_conf)
+
+def ensure_domain(domain: str):
+	if not exist_domain(domain):
+		if ACME_MOCK:
+			add_mock_domain(domain)
+		else:			
+			add_domain(domain)
+
+def add_mock_domain(domain: str):
+	os.makedirs(f"/etc/nginx/conf.d/{domain}")
+	utils.log_info(f"Created directory /etc/nginx/conf.d/{domain}")
+	utils.render_resource("conf/nginx.domain.insecure", f"/etc/nginx/conf.d/{domain}.conf", {
+		"domain": domain
+	})
+	crt = pathlib.Path(f"/etc/ssl/private/{domain}.crt")
+	crt.write_text("Mock!")
+	utils.log_info(f"Created container config /etc/nginx/conf.d/{domain}.conf")
 
 def add_domain(domain: str):
 	"""Create nginx conf and domain certificate and systemd renewal timer""" 
@@ -46,8 +65,8 @@ def add_domain(domain: str):
 		utils.log_info("Created request file " + csr)
 
 	domain_folder = f"/etc/nginx/conf.d/{domain}"
-	utils.render_resource("conf/nginx.server", f"/etc/nginx/conf.d/{domain}.conf", {
-		"DOMAIN_CRT": crt, "DOMAIN_KEY": key, "DOMAIN": domain})
+	utils.render_resource("conf/nginx.domain", f"/etc/nginx/conf.d/{domain}.conf", {
+		"domain_crt": crt, "domain_key": key, "domain": domain})
 	if not os.path.exists(domain_folder):
 		os.mkdir(domain_folder)
 	utils.log_info("Added new nginx domain config " + domain_folder + ".conf")
