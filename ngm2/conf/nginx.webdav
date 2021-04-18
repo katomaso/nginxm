@@ -1,5 +1,5 @@
 	location {{path}} {
-		alias /var/webdav/{{domain}}{{path}};
+		root /var/dav/{{domain}};
 
 		dav_access      user:rw group:rw all:rw;
 		dav_methods     PUT DELETE MKCOL COPY MOVE;

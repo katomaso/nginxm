@@ -42,6 +42,6 @@ server {
 
 `ngm2 proxy your.domain.com/service1 8091` proxy given url to localhost:8091
 
-`ngm2 protect your.domain.com username password` add optional basic-auth protection for all urls using this domain and starting with the path. If an url wants to use the defined protection, it needs to add `--protected` flag during creation. By default, any new url is unprotected.
+`ngm2 add-auth <username> <password> <filename>` create basic-auth file that can be re-used for any nginx endpoint (html, webdav, proxy...). If an url wants to use the authentication, it needs to say `--use-auth filename` flag during creation. The `<filename>` can be simply an url that is intended to be protected for better memorizing it.
 
-`ngm2 webdav your.domain.com/dav --protected` assigns a webdav endpoint to given URL and chooses a basic-auth protection for it defined in the previous step. Beware that you need to have `nginx-full` (which is the default nginx installation in Ubuntu) that supports third-party extension called webdav-ext.
+`ngm2 webdav your.domain.com/dav --use-auth <filename>` assigns a webdav endpoint to given URL and chooses a basic-auth protection for it defined in the previous step. Beware that you need to have `nginx-full` (which is the default nginx installation in Ubuntu) that supports third-party extension called webdav-ext.

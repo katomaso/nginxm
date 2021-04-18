@@ -14,7 +14,9 @@ COMMANDS with options:
 	install - run initially to set new "default" server config in nginx
 	html <url>
 	proxy <url> <port>
-	webdav <url> <username> <password>
+	webdav <url>
+	add-auth <url or a filename> <username> <password>
+	add-auth <url or a filename> <username> - # to type the password interactively
 
 ngm2 command must be run as root. It modifies nginx's conf.d
 and writes to /etc/ssl and creates folders under /var/www/. It
@@ -22,6 +24,7 @@ also sets systemd timers for domain certificates renewals.
 
 Some parts of this app can be modified using env vars:
 	DEBUG set to any value to allow debugging output
+	ACME_MOCK use unsecured domains and do not contact letsencrypt.com at all
 	ACME_URL to change for example for staging environment https://acme-staging-v02.api.letsencrypt.org/directory
 	ACME_KEY location where ACME account key is/will be stored; default: {acme.ACME_KEY}
 	ACME_CHALLENGE location where the challenges should be stored to be served by nginx; default: {acme.ACME_CHALLENGE}
@@ -51,40 +54,50 @@ def main() -> int:
 	if cmd == "install":
 		nginx.install_default()
 	elif cmd == "add-domain":
-		domain, = check_args(args, 1)
+		domain = check_args(args, 1)
 		acme.add_domain(domain)
 	elif cmd == "renew-domain":
-		domain, = check_args(args, 1)
+		domain = check_args(args, 1)
 		acme.renew_domain(domain)
 	elif cmd == "remove-domain":
-		domain, = check_args(args, 1)
+		domain = check_args(args, 1)
 		acme.remove_domain(domain)
 	elif cmd == "html":
-		url, = check_args(args, 1)
-		nginx.add_html(url, protected=check_protected(args))
-	elif cmd == "protect":
+		url = check_args(args, 1)
+		nginx.add_html(url, auth=get_auth(args))
+	elif cmd == "add-auth":
 		url, username, password = check_args(args, 3)
-		nginx.add_auth(url, username, password)
+		if password == "-":
+			nginx.add_auth(url, username, None) # interactive password
+		else:
+			nginx.add_auth(url, username, password)
 	elif cmd == "webdav":
-		url, = check_args(args, 1)
-		nginx.add_webdav(url, protected=check_protected(args))
+		url = check_args(args, 1)
+		nginx.add_webdav(url, auth=get_auth(args))
 	elif cmd == "proxy":
 		url, port = check_args(args, 2)
-		nginx.add_proxy(url, port, protected=check_protected(args))
+		nginx.add_proxy(url, port, auth=get_auth(args))
 	else:
 		print(__usage__, file=sys.stderr)
 		return 1
 	return 0
 
 def check_args(args, n: int):
+	if n == 1 and len(args) > 1:
+		return args[1]
 	if len(args) < n+1:
 		print("Not enough arguments for " + args[0], file=sys.stderr)
 		print(__usage__, file=sys.stderr)
 		sys.exit(1)
 	return args[1:1+n+1]
 
-def check_protected(args: List[str]):
-	return "--protected" in args
+def get_auth(args: List[str]):
+	if "--use-auth" in args:
+		index = args.index("--use-auth")
+		if len(args) > index:
+			return args[index+1]
+		raise ArgumentError("You must specify a value after --use-auth")
+	return None
 
 if __name__ == "__main__":
 	sys.exit(main())
