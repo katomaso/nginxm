@@ -1,12 +1,12 @@
 server {
 	listen 443 ssl;
-	server_name {{DOMAIN}};
+	server_name {{domain}};
 
-	ssl_certificate {{DOMAIN_CRT}};
-	ssl_certificate_key {{DOMAIN_KEY}};
+	ssl_certificate {{domain_crt}};
+	ssl_certificate_key {{domain_key}};
 	ssl_session_timeout 5m;
 	ssl_ciphers ECDHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:ECDHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-RSA-AES128-SHA;
 	ssl_session_cache shared:SSL:50m;
 
-	include /etc/nginx/conf.d/{{DOMAIN}}/*;
+	include /etc/nginx/conf.d/{{domain}}/*.conf;
 }

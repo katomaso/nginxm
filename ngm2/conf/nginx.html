@@ -1,5 +1,5 @@
-	location {{PATH}} {
-		root /var/www/{{domain}}{{path}};
+	location {{path}} {
+		root /var/www/{{domain}};
 		client_max_body_size 3M;
 		index index.html;
 		{% if authfile %}
