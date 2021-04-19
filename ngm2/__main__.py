@@ -11,12 +11,11 @@ __usage__ = f"""Usage: ngm2 COMMAND options
 
 COMMANDS with options:
 
-	install - run initially to set new "default" server config in nginx
+	init - run initially to set new "default" server config in nginx
 	html <url>
 	proxy <url> <port>
 	webdav <url>
-	add-auth <url or a filename> <username> <password>
-	add-auth <url or a filename> <username> - # to type the password interactively
+	add-auth <url or a filename> <username> [<password>]
 
 ngm2 command must be run as root. It modifies nginx's conf.d
 and writes to /etc/ssl and creates folders under /var/www/. It
@@ -31,7 +30,7 @@ Some parts of this app can be modified using env vars:
 """
 
 kwargs_def = {
-	"--use-auth": 1,
+	"--use-auth": {"default": None, },
 }
 
 # main function must be here because of setuptools entrypoint
@@ -65,8 +64,8 @@ def main() -> int:
 	if "ACME_MOCK" in os.environ:
 		acme.ACME_MOCK = True
 	cmd = args.pop(0)
-	if cmd == "install":
-		nginx.install_default()
+	if cmd == "init":
+		nginx.init()
 	elif cmd == "add-domain":
 		domain = get_args(args, 1)
 		acme.add_domain(domain)
@@ -78,7 +77,7 @@ def main() -> int:
 		acme.remove_domain(domain)
 	elif cmd == "html":
 		url = get_args(args, 1)
-		nginx.add_html(url, auth=kwargs['--use-auth'])
+		nginx.add_html(url, auth=kwargs.get('--use-auth'))
 	elif cmd == "add-auth":
 		if len(args) == 2:
 			url, username, password = *get_args(args, 2), None
@@ -87,10 +86,10 @@ def main() -> int:
 		nginx.add_auth(url, username, password)
 	elif cmd == "webdav":
 		url = get_args(args, 1)
-		nginx.add_webdav(url, auth=kwargs['--use-auth'])
+		nginx.add_webdav(url, auth=kwargs.get('--use-auth'))
 	elif cmd == "proxy":
 		url, port = get_args(args, 2)
-		nginx.add_proxy(url, port, auth=kwargs['--use-auth'])
+		nginx.add_proxy(url, port, auth=kwargs.get('--use-auth'))
 	else:
 		print(__usage__, file=sys.stderr)
 		return 1

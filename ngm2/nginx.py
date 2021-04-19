@@ -13,7 +13,7 @@ WEB_ROOT = pathlib.Path("/var/www/")
 DAV_ROOT = pathlib.Path("/var/dav/")
 AUTH_ROOT = pathlib.Path("/var/auth/")
 
-def install_default():
+def init():
 	"""Prepare directories and override default.conf with ngm2 compatible settings"""
 	acme_challenge = pathlib.Path("/var/www/.well-known/acme-challenge/")
 	acme_challenge.mkdir(parents=True, exist_ok=True)
@@ -30,7 +30,7 @@ def add_html(url:str, auth=False):
 	domain, path = utils.split_url(url)
 	acme.ensure_domain(domain)
 
-	web_root = WEB_ROOT / domain / path
+	web_root = WEB_ROOT / domain / path[1:]
 	web_conf = pathlib.Path(f"/etc/nginx/conf.d/{domain}/{utils.to_dirname(path)}.conf")
 
 	assert not web_root.exists(), f"Web root {web_root} already exists"
@@ -64,7 +64,7 @@ def add_webdav(url:str, auth=False):
 	domain, path = utils.split_url(url)
 	acme.ensure_domain(domain)
 
-	webdav_root = DAV_ROOT / domain / path
+	webdav_root = DAV_ROOT / domain / path[1:]
 	webdav_conf = pathlib.Path(f"/etc/nginx/conf.d/{domain}/{utils.to_dirname(path)}.conf")
 
 	assert not webdav_conf.exists(), f"{url} is already taken!"
