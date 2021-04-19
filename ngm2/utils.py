@@ -33,8 +33,6 @@ def log_level(level: str):
 
 def to_dirname(path: str) -> str:
 	"""Turn a webpath into usable directory name by replacing '/' and having non-empty result"""
-	if path is None:
-		None
 	return (path.strip("/").replace('/', '-') if path != "/" else "default")
 
 def split_url(url: str):

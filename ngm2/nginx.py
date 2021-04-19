@@ -101,4 +101,6 @@ def _standard_context(domain: str, path: str, auth:str, **kwargs):
 	return ctx
 
 def _authfile(auth):
+	if auth is None:
+		return None
 	return AUTH_ROOT / utils.to_dirname(auth)

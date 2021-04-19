@@ -30,6 +30,10 @@ Some parts of this app can be modified using env vars:
 	ACME_CHALLENGE location where the challenges should be stored to be served by nginx; default: {acme.ACME_CHALLENGE}
 """
 
+kwargs_def = {
+	"--use-auth": 1,
+}
+
 # main function must be here because of setuptools entrypoint
 # otherwise the content of main() would be simply in the file
 def main() -> int:
@@ -41,7 +45,17 @@ def main() -> int:
 		utils.log_level("debug")
 	else:
 		utils.log_level("info")
-
+	# remove --parameters from the app's arguments and place them into `kwargs`
+	kwargs = {}
+	for key, vals in kwargs_def.items():
+		if key in args:
+			i = args.index(key)
+			del args[i]
+			if vals > 0:
+				kwargs[key] = args.pop(i)
+			else:
+				kwargs[key] = True
+	# inspect env var that modifies the program's execution
 	if "ACME_URL" in os.environ:
 		acme.ACME_URL = os.environ["ACME_URL"]
 	if "ACME_KEY" in os.environ:
@@ -50,54 +64,46 @@ def main() -> int:
 		acme.ACME_CHALLENGE = os.environ["ACME_CHALLENGE"]
 	if "ACME_MOCK" in os.environ:
 		acme.ACME_MOCK = True
-	cmd = args[0]
+	cmd = args.pop(0)
 	if cmd == "install":
 		nginx.install_default()
 	elif cmd == "add-domain":
-		domain = check_args(args, 1)
+		domain = get_args(args, 1)
 		acme.add_domain(domain)
 	elif cmd == "renew-domain":
-		domain = check_args(args, 1)
+		domain = get_args(args, 1)
 		acme.renew_domain(domain)
 	elif cmd == "remove-domain":
-		domain = check_args(args, 1)
+		domain = get_args(args, 1)
 		acme.remove_domain(domain)
 	elif cmd == "html":
-		url = check_args(args, 1)
-		nginx.add_html(url, auth=get_auth(args))
+		url = get_args(args, 1)
+		nginx.add_html(url, auth=kwargs['--use-auth'])
 	elif cmd == "add-auth":
-		url, username, password = check_args(args, 3)
-		if password == "-":
-			nginx.add_auth(url, username, None) # interactive password
+		if len(args) == 2:
+			url, username, password = *get_args(args, 2), None
 		else:
-			nginx.add_auth(url, username, password)
+			url, username, password = get_args(args, 3)
+		nginx.add_auth(url, username, password)
 	elif cmd == "webdav":
-		url = check_args(args, 1)
-		nginx.add_webdav(url, auth=get_auth(args))
+		url = get_args(args, 1)
+		nginx.add_webdav(url, auth=kwargs['--use-auth'])
 	elif cmd == "proxy":
-		url, port = check_args(args, 2)
-		nginx.add_proxy(url, port, auth=get_auth(args))
+		url, port = get_args(args, 2)
+		nginx.add_proxy(url, port, auth=kwargs['--use-auth'])
 	else:
 		print(__usage__, file=sys.stderr)
 		return 1
 	return 0
 
-def check_args(args, n: int):
-	if n == 1 and len(args) > 1:
-		return args[1]
-	if len(args) < n+1:
-		print("Not enough arguments for " + args[0], file=sys.stderr)
+def get_args(args, n: int):
+	if n == 1 and len(args) >= 1:
+		return args[0]
+	if len(args) < n:
+		print("Not enough arguments", file=sys.stderr)
 		print(__usage__, file=sys.stderr)
 		sys.exit(1)
-	return args[1:1+n+1]
-
-def get_auth(args: List[str]):
-	if "--use-auth" in args:
-		index = args.index("--use-auth")
-		if len(args) > index:
-			return args[index+1]
-		raise ArgumentError("You must specify a value after --use-auth")
-	return None
+	return args[:n]
 
 if __name__ == "__main__":
 	sys.exit(main())
