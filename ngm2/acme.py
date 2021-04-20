@@ -25,7 +25,7 @@ def ensure_domain(domain: str):
 	if not exist_domain(domain):
 		if ACME_MOCK:
 			add_mock_domain(domain)
-		else:			
+		else:
 			add_domain(domain)
 
 def add_mock_domain(domain: str):
@@ -39,11 +39,18 @@ def add_mock_domain(domain: str):
 	utils.log_info(f"Created container config /etc/nginx/conf.d/{domain}.conf")
 
 def add_domain(domain: str):
-	"""Create nginx conf and domain certificate and systemd renewal timer""" 
+	"""Create nginx conf and domain certificate and systemd renewal timer"""
 	if domain.startswith("http"):
 		raise ValueError("Domain must not contain schema (http[s])")
 	if "/" in domain:
 		raise ValueError("Domain must not contain path")
+	os.makedirs('/etc/ssl/acme/', exist_ok=True)
+
+	acme_key = pathlib.Path(ACME_KEY)
+	if not acme_key.exists():
+		with open(key, "wb") as account_key_file:
+			subprocess.run(["openssl", "genrsa", "4096"], stdout=account_key_file, check=True)
+			utils.log_info("Created account key " + acme_key)
 
 	assert os.path.isdir(ACME_CHALLENGE), f"Folder {ACME_CHALLENGE} must exist"
 
