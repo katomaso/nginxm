@@ -30,7 +30,7 @@ def add_html(url:str, auth=False):
 	domain, path = utils.split_url(url)
 	acme.ensure_domain(domain)
 
-	web_root = WEB_ROOT / domain / path[1:]
+	web_root = WEB_ROOT / domain / utils.to_dirname(path)
 	web_conf = pathlib.Path(f"/etc/nginx/conf.d/{domain}/{utils.to_dirname(path)}.conf")
 
 	assert not web_root.exists(), f"Web root {web_root} already exists"
@@ -39,7 +39,7 @@ def add_html(url:str, auth=False):
 	# create web roots
 	web_root.mkdir(parents=True) # throws if folder already exists
 
-	ctx = _standard_context(domain, path, auth)
+	ctx = _standard_context(domain, path, auth, root=web_root)
 	utils.render_resource("conf/nginx.html", web_conf, ctx)
 	utils.log_info(f"You can place your html files into {web_root}")
 
@@ -64,7 +64,7 @@ def add_webdav(url:str, auth=False):
 	domain, path = utils.split_url(url)
 	acme.ensure_domain(domain)
 
-	webdav_root = DAV_ROOT / domain / path[1:]
+	webdav_root = DAV_ROOT / domain / utils.to_dirname(path)
 	webdav_conf = pathlib.Path(f"/etc/nginx/conf.d/{domain}/{utils.to_dirname(path)}.conf")
 
 	assert not webdav_conf.exists(), f"{url} is already taken!"
@@ -72,7 +72,7 @@ def add_webdav(url:str, auth=False):
 
 	webdav_root.mkdir(parents=True)
 	shutil.chown(str(webdav_root), "www-data")
-	ctx = _standard_context(domain, path, auth)
+	ctx = _standard_context(domain, path, auth, root=webdav_root)
 	utils.render_resource("conf/nginx.webdav", webdav_conf, ctx)
 	utils.log_info(f"Your webdav folder is {webdav_root}")
 

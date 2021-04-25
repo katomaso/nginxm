@@ -1,5 +1,5 @@
 	location {{path}} {
-		root /var/www/{{domain}};
+		alias {{root}};
 		client_max_body_size 3M;
 		index index.html;
 		{% if authfile %}
