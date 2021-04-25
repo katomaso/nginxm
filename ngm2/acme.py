@@ -16,6 +16,8 @@ ACME_KEY = "/etc/ssl/acme/account.key"
 ACME_CHALLENGE = "/var/www/.well-known/acme-challenge"
 ACME_MOCK = False
 
+p = pathlib.Path
+
 def exist_domain(domain: str) -> bool :
 	crt_link = f"/etc/ssl/private/{domain}.crt"
 	domain_conf = f"/etc/nginx/conf.d/{domain}.conf"
@@ -48,38 +50,39 @@ def add_domain(domain: str):
 
 	acme_key = pathlib.Path(ACME_KEY)
 	if not acme_key.exists():
-		with open(key, "wb") as account_key_file:
+		with acme_key.open("wb") as account_key_file:
 			subprocess.run(["openssl", "genrsa", "4096"], stdout=account_key_file, check=True)
-			utils.log_info("Created account key " + acme_key)
+			utils.log_info(f"Created account key {acme_key}")
 
 	assert os.path.isdir(ACME_CHALLENGE), f"Folder {ACME_CHALLENGE} must exist"
 
-	key = f"/etc/ssl/acme/{domain}.key"
-	csr = f"/etc/ssl/acme/{domain}.csr"
-	crt = f"/etc/ssl/private/{domain}.crt"
+	key = p("/etc/ssl/acme/{domain}.key")
+	csr = p("/etc/ssl/acme/{domain}.csr")
+	crt = p("/etc/ssl/private/{domain}.crt")
 
-	assert not os.path.exists(key), "Key for the domain already exist at " + key
-	assert not os.path.exists(csr), "Signing request for the domain already exist at " + csr
+	assert not key.exists(), f"Key for the domain already exist at {key}"
+	assert not csr.exists(), f"Signing request for the domain already exist at {csr}"
 
 	# create private key for the domain
-	with open(key, "wb") as key_file:
+	with key.open("wb") as key_file:
 		subprocess.run(["openssl", "genrsa", "4096"], stdout=key_file, check=True)
-		utils.log_info("Created domain key " + key)
+		utils.log_info(f"Created domain key {key}")
 
 	# create a CSR for the domain
-	with open(csr, "wb") as csr_file:
-		subprocess.run(["openssl", 'req', '-new', '-sha256', '-key', key, '-subj', f'/CN={domain}'], stdout=csr_file, check=True)
-		utils.log_info("Created request file " + csr)
+	with csr.open("wb") as csr_file:
+		subprocess.run(["openssl", 'req', '-new', '-sha256', '-key', str(key), '-subj', f'/CN={domain}'], stdout=csr_file, check=True)
+		utils.log_info(f"Created request file {csr}")
 
+	# generate signed certificate
+	renew_domain(domain)
+
+	# if everything is fine - let's add configs with the SSL certificate
 	domain_folder = f"/etc/nginx/conf.d/{domain}"
 	utils.render_resource("conf/nginx.domain", f"/etc/nginx/conf.d/{domain}.conf", {
 		"domain_crt": crt, "domain_key": key, "domain": domain})
 	if not os.path.exists(domain_folder):
 		os.mkdir(domain_folder)
 	utils.log_info("Added new nginx domain config " + domain_folder + ".conf")
-
-	# generate signed certificate
-	renew_domain(domain)
 
 	# add domain renewal timer and start it right away
 	if not os.path.exists("/etc/systemd/system/renew-domain@.service"):
@@ -112,10 +115,6 @@ def	renew_domain(domain: str):
 		os.unlink(crt_link)
 	os.symlink(crt, crt_link)
 	utils.log_info("Symlinked certificate to " + crt_link)
-
-	subprocess.run(["nginx", "-t"], check=True)
-	subprocess.run(["systemctl", "reload", "nginx"], check=True)
-	utils.log_info("Nginx reloaded")
 
 def remove_domain(domain: str):
 	os.rmdir(f"/etc/nginx/conf.d/{domain}")
