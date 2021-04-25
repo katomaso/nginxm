@@ -83,6 +83,11 @@ def main() -> int:
 			url, username, password = *get_args(args, 2), None
 		else:
 			url, username, password = get_args(args, 3)
+		if "." in username and "." not in url:
+			if password is None:
+				url, username = username, url
+			else:
+				url, username, password = username, password, url
 		nginx.add_auth(url, username, password)
 	elif cmd == "webdav":
 		url = get_args(args, 1)
@@ -90,6 +95,8 @@ def main() -> int:
 	elif cmd == "proxy":
 		url, port = get_args(args, 2)
 		nginx.add_proxy(url, port, auth=kwargs.get('--use-auth'))
+	elif cmd == "apply":
+		nginx.apply()
 	else:
 		print(__usage__, file=sys.stderr)
 		return 1
