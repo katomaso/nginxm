@@ -74,7 +74,7 @@ def add_webdav(url:str, auth=False):
 	shutil.chown(str(webdav_root), "www-data")
 	ctx = _standard_context(domain, path, auth, root=webdav_root)
 	utils.render_resource("conf/nginx.webdav", webdav_conf, ctx)
-	utils.log_info(f"Your webdav folder is {webdav_root}")
+	utils.log_info(f"Your new webdav folder is {webdav_root}")
 
 def add_proxy(url:str, port:int, auth=False):
 	domain, path = utils.split_url(url)
@@ -84,7 +84,8 @@ def add_proxy(url:str, port:int, auth=False):
 	assert not proxy_conf.exists(), f"{url} is already taken!"
 
 	ctx = _standard_context(domain, path, auth, port=port)
-	utils.render_resource("conf/nginx.webdav", proxy_conf, ctx)
+	utils.render_resource("conf/nginx.proxy", proxy_conf, ctx)
+	utils.log_info(f"Path {path} now proxies localhost:{port}")
 
 def apply():
 	"""Apply settings by first checking them using `nginx -t` and then reloading nginx"""
