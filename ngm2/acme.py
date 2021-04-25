@@ -56,9 +56,9 @@ def add_domain(domain: str):
 
 	assert os.path.isdir(ACME_CHALLENGE), f"Folder {ACME_CHALLENGE} must exist"
 
-	key = p("/etc/ssl/acme/{domain}.key")
-	csr = p("/etc/ssl/acme/{domain}.csr")
-	crt = p("/etc/ssl/private/{domain}.crt")
+	key = p(f"/etc/ssl/acme/{domain}.key")
+	csr = p(f"/etc/ssl/acme/{domain}.csr")
+	crt = p(f"/etc/ssl/private/{domain}.crt")
 
 	assert not key.exists(), f"Key for the domain already exist at {key}"
 	assert not csr.exists(), f"Signing request for the domain already exist at {csr}"
@@ -82,7 +82,7 @@ def add_domain(domain: str):
 		"domain_crt": crt, "domain_key": key, "domain": domain})
 	if not os.path.exists(domain_folder):
 		os.mkdir(domain_folder)
-	utils.log_info("Added new nginx domain config " + domain_folder + ".conf")
+	utils.log_info(f"Added new nginx domain config {domain_folder}.conf")
 
 	# add domain renewal timer and start it right away
 	if not os.path.exists("/etc/systemd/system/renew-domain@.service"):
