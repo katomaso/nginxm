@@ -1,5 +1,5 @@
 	location {{path}} {
-		alias {{root}};
+		alias {{root}}/;
 
 		dav_access      user:rw group:rw all:rw;
 		dav_methods     PUT DELETE MKCOL COPY MOVE;
