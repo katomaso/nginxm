@@ -15,7 +15,7 @@ COMMANDS with options:
 	html <url>
 	proxy <url> <port>
 	webdav <url>
-	add-auth <url or a filename> <username> [<password>]
+	create-auth-file <filename (can have form of url)> <username> [<password>]
 
 ngm2 command must be run as root. It modifies nginx's conf.d
 and writes to /etc/ssl and creates folders under /var/www/. It
@@ -29,9 +29,8 @@ Some parts of this app can be modified using env vars:
 	ACME_CHALLENGE location where the challenges should be stored to be served by nginx; default: {acme.ACME_CHALLENGE}
 """
 
-kwargs_def = {
-	"--use-auth": {"default": None, },
-}
+# parameters must have a value
+params_def = ("--use-auth", )
 
 # main function must be here because of setuptools entrypoint
 # otherwise the content of main() would be simply in the file
@@ -46,14 +45,11 @@ def main() -> int:
 		utils.log_level("info")
 	# remove --parameters from the app's arguments and place them into `kwargs`
 	kwargs = {}
-	for key, vals in kwargs_def.items():
+	for key in params_def:
 		if key in args:
 			i = args.index(key)
 			del args[i]
-			if vals > 0:
-				kwargs[key] = args.pop(i)
-			else:
-				kwargs[key] = True
+			kwargs[key] = args.pop(i)
 	# inspect env var that modifies the program's execution
 	if "ACME_URL" in os.environ:
 		acme.ACME_URL = os.environ["ACME_URL"]
@@ -78,7 +74,7 @@ def main() -> int:
 	elif cmd == "html":
 		url = get_args(args, 1)
 		nginx.add_html(url, auth=kwargs.get('--use-auth'))
-	elif cmd == "add-auth":
+	elif cmd == "create-auth-file":
 		if len(args) == 2:
 			url, username, password = *get_args(args, 2), None
 		else:
