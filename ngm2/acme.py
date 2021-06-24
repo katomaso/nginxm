@@ -60,18 +60,22 @@ def add_domain(domain: str):
 	csr = p(f"/etc/ssl/acme/{domain}.csr")
 	crt = p(f"/etc/ssl/private/{domain}.crt")
 
-	assert not key.exists(), f"Key for the domain already exist at {key}"
-	assert not csr.exists(), f"Signing request for the domain already exist at {csr}"
-
-	# create private key for the domain
-	with key.open("wb") as key_file:
-		subprocess.run(["openssl", "genrsa", "4096"], stdout=key_file, check=True)
+	# create ACME account ket
+	if not key.exists():
+		# create private key for the domain
+		with key.open("wb") as key_file:
+			subprocess.run(["openssl", "genrsa", "4096"], stdout=key_file, check=True)
 		utils.log_info(f"Created domain key {key}")
+	else:
+		utils.log_info(f"Key for the domain already exist at {key}")
 
 	# create a CSR for the domain
-	with csr.open("wb") as csr_file:
-		subprocess.run(["openssl", 'req', '-new', '-sha256', '-key', str(key), '-subj', f'/CN={domain}'], stdout=csr_file, check=True)
+	if not csr.exists():
+		with csr.open("wb") as csr_file:
+			subprocess.run(["openssl", 'req', '-new', '-sha256', '-key', str(key), '-subj', f'/CN={domain}'], stdout=csr_file, check=True)
 		utils.log_info(f"Created request file {csr}")
+	else:
+		utils.log_info(f"Signing request for the domain already exist at {csr}")
 
 	# generate signed certificate
 	renew_domain(domain)
