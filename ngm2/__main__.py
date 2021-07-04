@@ -7,7 +7,7 @@ from . import utils
 
 from typing import List
 
-__usage__ = f"""Usage: ngm2 COMMAND options
+__usage__ = f"""Usage: ngm2 COMMAND OPTIONS
 
 COMMANDS with options:
 
@@ -16,6 +16,10 @@ COMMANDS with options:
 	proxy <url> <port>
 	webdav <url>
 	create-auth-file <filename (can have form of url)> <username> [<password>]
+
+OPTIONS:
+
+	--use-auth <filename> (add authentication to the endpoint)
 
 ngm2 command must be run as root. It modifies nginx's conf.d
 and writes to /etc/ssl and creates folders under /var/www/. It
@@ -50,6 +54,9 @@ def main() -> int:
 			i = args.index(key)
 			del args[i]
 			kwargs[key] = args.pop(i)
+	if any(map(lambda a: a.startswith("--"), args)):
+		print("Unknown parameter given")
+		return 1
 	# inspect env var that modifies the program's execution
 	if "ACME_URL" in os.environ:
 		acme.ACME_URL = os.environ["ACME_URL"]
