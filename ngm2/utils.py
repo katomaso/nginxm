@@ -32,11 +32,11 @@ def log_level(level: str):
 	logging.basicConfig(level=logging.DEBUG if level=="debug" else logging.INFO)
 
 def to_dirname(path: str) -> str:
+	"""Turn a webpath into usable directory name by replacing '/' and having non-empty result"""
 	path = path.strip("/.")
 	if path == "":
 		return "default"
-	"""Turn a webpath into usable directory name by replacing '/' and having non-empty result"""
-	return .replace('/', '-')
+	return path.replace('/', '-')
 
 def split_url(url: str):
 	assert not url.startswith("http"), "URL must not contain protocol - just domain/path"
