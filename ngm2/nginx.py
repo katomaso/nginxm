@@ -42,6 +42,7 @@ def add_html(url:str, auth=False):
 	ctx = _standard_context(domain, path, auth, root=web_root)
 	utils.render_resource("conf/nginx.html", web_conf, ctx)
 	utils.log_info(f"You can place your html files into {web_root}")
+	return web_root
 
 def add_auth(url:str, username:str, password:str):
 	domain, path = utils.split_url(url)
@@ -58,6 +59,7 @@ def add_auth(url:str, username:str, password:str):
 		else:
 			utils.log_info(f"User {username} added to {url} authentication file")
 			authdb.add(username, password)
+	return authfile
 
 def add_webdav(url:str, auth=False):
 	"""Add nginx "location" configuration into domain's conf.d folder"""
@@ -75,6 +77,7 @@ def add_webdav(url:str, auth=False):
 	ctx = _standard_context(domain, path, auth, root=webdav_root)
 	utils.render_resource("conf/nginx.webdav", webdav_conf, ctx)
 	utils.log_info(f"Your new webdav folder is {webdav_root}")
+	return webdav_root
 
 def add_proxy(url:str, port:int, auth=False):
 	domain, path = utils.split_url(url)

@@ -1,4 +1,6 @@
 	location {{path}} {
+		add_header "Access-Control-Allow-Origin" * always;
+
 		# Preflighted requests
 		if ($request_method = OPTIONS) {
 			add_header "Access-Control-Allow-Origin" *;
