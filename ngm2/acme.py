@@ -77,8 +77,11 @@ def add_domain(domain: str):
 	else:
 		utils.log_info(f"Signing request for the domain already exist at {csr}")
 
-	# generate signed certificate
-	renew_domain(domain)
+	if not crt.exists():
+		renew_domain(domain)
+		utils.log_info(f"Signed domain with certificate linked to {crt}")
+	else:
+		utils.log_info(f"Domain certificate {crt} already exists")
 
 	# if everything is fine - let's add configs with the SSL certificate
 	domain_folder = f"/etc/nginx/conf.d/{domain}"

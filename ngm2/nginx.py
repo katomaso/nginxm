@@ -25,7 +25,7 @@ def init():
 		utils.log_info("Unlinking old default file /etc/nginx/sites-enabled/default")
 		os.unlink("/etc/nginx/sites-enabled/default")
 
-def add_html(url:str, auth=False):
+def add_html(url:str, auth:str=None):
 	"""Add nginx "location" configuration into domain's conf.d folder"""
 	domain, path = utils.split_url(url)
 	acme.ensure_domain(domain)
@@ -61,7 +61,7 @@ def add_auth(url:str, username:str, password:str):
 			authdb.add(username, password)
 	return authfile
 
-def add_webdav(url:str, auth=False):
+def add_webdav(url:str, auth:str=None):
 	"""Add nginx "location" configuration into domain's conf.d folder"""
 	domain, path = utils.split_url(url)
 	acme.ensure_domain(domain)
@@ -79,7 +79,7 @@ def add_webdav(url:str, auth=False):
 	utils.log_info(f"Your new webdav folder is {webdav_root}")
 	return webdav_root
 
-def add_proxy(url:str, port:int, auth=False):
+def add_proxy(url:str, port:int, auth:str=None):
 	domain, path = utils.split_url(url)
 	acme.ensure_domain(domain)
 
